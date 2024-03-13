@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Random HTML</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Welcome to the Random HTML Page!</h1>
+    <p>This is a randomly generated HTML page.</p>
+    <p>Feel free to modify it as per your requirements.</p>
+
+    <div>
+        <input type="text" name="my_usr" id="my_usr" placeholder="Enter YOUR username">
+        <button onclick="create_con()">Create connection</button>
+        <button onclick="sendData()">Send message to all users</button>
+    </div>
+    <div>
+        <input type="text" name="usr" id="usr" placeholder="Enter username">
+        <input type="text" name="msg" id="msg" placeholder="Enter msg">
+        <button onclick="send_msg_user()">Send message to user</button>
+    </div>
+    <div>
+        <input type="text" name="chat_name" id="chat_name" placeholder="Enter chat name">
+        <button onclick="create_chat()">Create chat</button>
+    </div>
+    <div>
+    </div>
+
+</body>
+
+<script>
+    var chat_uuid = '';
+    function create_con()
+    {
+        const socket = new WebSocket('ws://localhost:8080/create_user?username=' + document.getElementById('my_usr').value);
+
+
+        socket.onopen = function ()
+        {
+            console.log('WebSocket connection established.');
+        };
+
+        socket.onmessage = function (event)
+        {
+            const message = event.data;
+            console.log('Received message:', message);
+        };
+
+        socket.onerror = function (error)
+        {
+            console.error('WebSocket error:', error);
+        };
+
+        socket.onclose = function ()
+        {
+            console.log('WebSocket connection closed.');
+        };
+    }
+
+    function sendData()
+    {
+        fetch('/send_msg_all');
+    }
+
+    function send_msg_user()
+    {
+        const usr = document.getElementById('usr').value;
+        const msg = document.getElementById('msg').value;
+        var data = {
+            username: usr,
+            message: msg
+        };
+        fetch('/send_msg_user', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        })
+    }
+
+    function create_chat()
+    {
+        var data = {
+            username1: document.getElementById('my_usr').value,
+            username2: document.getElementById('chat_name').value
+        };
+        fetch('/create_chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        }).then(response => response.json())
+            .then(data =>
+            {
+                chat_uuid = data.uuid
+                console.log(chat_uuid);
+            })
+            .catch((error) =>
+            {
+                console.error('Error:', error);
+            });
+    }
+
+</script>
+
+</html>
